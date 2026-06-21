@@ -1,0 +1,30 @@
+name: build-web
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Build web
+        run: |
+          flutter create --org com.tofrix --project-name tofrixapp app
+          cp lib/main.dart app/lib/main.dart
+          cd app
+          flutter pub add google_fonts
+          flutter build web --base-href /tofrix-apk-build/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/build/web
+      - id: deployment
+        uses: actions/deploy-pages@v4
